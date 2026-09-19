@@ -3,7 +3,8 @@ const USER_KEY = 'attr_dashboard_user';
 const BASE_KEY = 'attr_dashboard_base';
 
 export function getBase() {
-  return localStorage.getItem(BASE_KEY) || 'https://winkbrowbar-production2.up.railway.app';
+  // return localStorage.getItem(BASE_KEY) || 'https://winkbrowbar-production2.up.railway.app';
+    return localStorage.getItem(BASE_KEY) || 'https://api.winkbrowbar.com';
     // return localStorage.getItem(BASE_KEY) || 'http://localhost:4000';
 
 }
