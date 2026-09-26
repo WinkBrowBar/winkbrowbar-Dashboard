@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { key: 'campaigns', label: 'Campaigns' },
   { key: 'customers', label: 'Customers' },
   { key: 'transactions', label: 'Transactions' },
+  { key: 'upcoming', label: 'Upcoming' },
   { key: 'team', label: 'Team', adminOnly: true },
 ];
 

@@ -47,15 +47,15 @@ export default function CampaignDrilldown({ campaign, platform, range, onClose }
   return (
     <Modal
       title={campaign}
-      subtitle="Customers who converted through this ad, most recent purchase first"
+      subtitle="Invoices attributed to this ad, most recent first. Open invoices are listed but not counted in revenue."
       onClose={onClose}
       wide
     >
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <PlatformBadge platform={platform} />
-        {data && <span className="text-[12.5px] text-ink/45">{data.total} customer{data.total === 1 ? '' : 's'} attributed</span>}
+        {data && <span className="text-[12.5px] text-ink/45">{data.total} invoice{data.total === 1 ? '' : 's'}{data.openCount ? ` (${data.openCount} open)` : ''}</span>}
         <div className="ml-auto">
-          <SearchInput value={search} onChange={setSearch} placeholder="Search name, email, or phone…" />
+          <SearchInput value={search} onChange={setSearch} placeholder="Search invoice #, name, email, or phone…" />
         </div>
       </div>
 
@@ -63,7 +63,7 @@ export default function CampaignDrilldown({ campaign, platform, range, onClose }
 
       {loading ? (
         <SkeletonLines count={5} />
-      ) : !data || data.customers.length === 0 ? (
+      ) : !data || data.invoices.length === 0 ? (
         <EmptyState
           text={
             debouncedSearch
@@ -73,19 +73,21 @@ export default function CampaignDrilldown({ campaign, platform, range, onClose }
         />
       ) : (
         <div className="scrollbar-thin -mx-1 overflow-x-auto">
-          <table className="w-full min-w-[620px] border-collapse px-1 text-[13.5px]">
+          <table className="w-full min-w-[760px] border-collapse px-1 text-[13.5px]">
             <thead>
               <tr className="border-b border-ink/10 text-left font-mono text-[10.5px] uppercase tracking-wide text-ink/45">
+                <th className="pb-2.5 pr-3">Invoice #</th>
                 <th className="pb-2.5 pr-3"><ThWithInfo label="Customer" info={COLUMN_INFO.customer} /></th>
                 <th className="pb-2.5 pr-3"><ThWithInfo label="Source / Medium" info={COLUMN_INFO.sourceMedium} /></th>
-                <th className="pb-2.5 pr-3 text-right"><ThWithInfo label="Conversions" info={COLUMN_INFO.conversions} align="right" /></th>
-                <th className="pb-2.5 pr-3 text-right"><ThWithInfo label="Revenue" info={COLUMN_INFO.revenue} align="right" /></th>
-                <th className="pb-2.5 text-right"><ThWithInfo label="Last Converted" info={COLUMN_INFO.lastConverted} align="right" /></th>
+                <th className="pb-2.5 pr-3">Status</th>
+                <th className="pb-2.5 pr-3 text-right">Amount</th>
+                <th className="pb-2.5 text-right">Date</th>
               </tr>
             </thead>
             <tbody>
-              {data.customers.map((c) => (
-                <tr key={c._id || c.email} className="border-b border-ink/10 last:border-none">
+              {data.invoices.map((c) => (
+                <tr key={String(c.invoiceId)} className="border-b border-ink/10 last:border-none">
+                  <td className="py-2.5 pr-3 font-mono text-[12.5px] text-ink/70">{c.invoiceNumber || '—'}</td>
                   <td className="py-2.5 pr-3">
                     <div className="font-medium text-ink">{c.name || '—'}</div>
                     <div className="text-[12px] text-ink/45">{c.email || c.phone || '—'}</div>
@@ -93,9 +95,13 @@ export default function CampaignDrilldown({ campaign, platform, range, onClose }
                   <td className="py-2.5 pr-3 text-[12.5px] text-ink/60">
                     {[c.utmSource, c.utmMedium].filter(Boolean).join(' / ') || '—'}
                   </td>
-                  <td className="py-2.5 pr-3 text-right font-mono">{c.conversions}</td>
-                  <td className="py-2.5 pr-3 text-right font-mono" style={{ color: meta.color }}>{money(c.revenue)}</td>
-                  <td className="py-2.5 text-right font-mono text-ink/50">{shortDate(c.lastConvertedAt)}</td>
+                  <td className="py-2.5 pr-3">
+                    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${c.status === 'open' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                      {c.status === 'open' ? 'Open' : 'Closed'}
+                    </span>
+                  </td>
+                  <td className="py-2.5 pr-3 text-right font-mono" style={{ color: c.status === 'open' ? undefined : meta.color }}>{money(c.amount)}</td>
+                  <td className="py-2.5 text-right font-mono text-ink/50">{shortDate(c.date)}</td>
                 </tr>
               ))}
             </tbody>

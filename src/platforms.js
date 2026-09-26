@@ -51,7 +51,7 @@ export function shortDate(d) {
 
 export function shortDateTime(d) {
   if (!d) return '—';
-  return new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: CLIENT_TIME_ZONE });
+  return new Date(d).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: CLIENT_TIME_ZONE });
 }
 
 export function toISODate(d) {

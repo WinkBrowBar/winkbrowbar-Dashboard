@@ -6,6 +6,7 @@ import Overview from './pages/Overview';
 import Campaigns from './pages/Campaigns';
 import Customers from './pages/Customers';
 import Transactions from './pages/Transactions';
+import Upcoming from './pages/Upcoming';
 import Team from './pages/Team';
 import Reports from './pages/Reports';
 import Analytics from './pages/Analytics';
@@ -17,6 +18,7 @@ const PAGES = {
   campaigns: Campaigns,
   customers: Customers,
   transactions: Transactions,
+  upcoming: Upcoming,
   team: Team,
 };
 

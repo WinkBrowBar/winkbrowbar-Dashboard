@@ -100,13 +100,14 @@ export function getCampaigns(range, location) {
 }
 export const getLocations = (range) => apiGet(`/api/dashboard/locations?${rangeParams(range)}`);
 
-export function getTransactions({ range, page = 1, limit = 25, search = '', platform = 'all', location = 'all' } = {}) {
+export function getTransactions({ range, page = 1, limit = 25, search = '', platform = 'all', location = 'all', status = 'all' } = {}) {
   const p = rangeParams(range);
   p.set('page', page);
   p.set('limit', limit);
   if (search) p.set('search', search);
   if (platform && platform !== 'all') p.set('platform', platform);
   if (location && location !== 'all') p.set('location', location);
+  if (status && status !== 'all') p.set('status', status);
   return apiGet(`/api/dashboard/transactions?${p}`);
 }
 export const getCac = (range) => apiGet(`/api/dashboard/cac?${rangeParams(range)}`);
@@ -120,6 +121,15 @@ export function getRecentPurchases(limit = 10, location) {
 // Static catalog of known centers, e.g. [{ id, name }], independent of any
 // date range - for populating a location picker.
 export const getCenterList = () => apiGet('/api/dashboard/center-list');
+
+export function getUpcomingBookings({ page = 1, limit = 25, location = 'all', platform = 'all' } = {}) {
+  const p = new URLSearchParams();
+  p.set('page', page);
+  p.set('limit', limit);
+  if (location && location !== 'all') p.set('location', location);
+  if (platform && platform !== 'all') p.set('platform', platform);
+  return apiGet(`/api/dashboard/upcoming?${p}`);
+}
 
 // Single-location rollup (revenue, invoices, AOV, revenue-by-platform,
 // recent purchases). location omitted/'all' scopes to every location

@@ -12,6 +12,7 @@ export default function Transactions() {
   const [range, setRange] = useState({ days: 30 });
   const [location, setLocation] = useState('all');
   const [platform, setPlatform] = useState('all');
+  const [status, setStatus] = useState('all');
   const [centers, setCenters] = useState([]);
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
@@ -27,20 +28,20 @@ export default function Transactions() {
     return () => clearTimeout(t);
   }, [search]);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch, range, location, platform]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, range, location, platform, status]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await getTransactions({ range, page, limit: 25, search: debouncedSearch, platform, location });
+      const res = await getTransactions({ range, page, limit: 25, search: debouncedSearch, platform, location, status });
       setData(res);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [range, page, debouncedSearch, platform, location]);
+  }, [range, page, debouncedSearch, platform, location, status]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -49,12 +50,13 @@ export default function Transactions() {
   async function exportCsv() {
     setExporting(true);
     try {
-      const res = await getTransactions({ range, page: 1, limit: 10000, search: debouncedSearch, platform, location });
+      const res = await getTransactions({ range, page: 1, limit: 10000, search: debouncedSearch, platform, location, status });
       const rows = res.transactions || [];
-      const header = ['Customer', 'Email', 'Product', 'Price', 'Location', 'Platform', 'Campaign', 'Purchase Date'];
+      const header = ['Invoice #', 'Customer', 'Email', 'Product', 'Price', 'Location', 'Platform', 'Campaign', 'Status', 'Purchase Date'];
       const csvRows = [header.join(',')];
       rows.forEach((r) => {
         const line = [
+          r.invoiceNumber || '',
           r.customerName || '',
           r.email || '',
           r.productName || '',
@@ -62,7 +64,8 @@ export default function Transactions() {
           r.location || '',
           r.platform || '',
           r.campaign || '',
-          r.purchaseDate ? new Date(r.purchaseDate).toISOString().slice(0, 10) : '',
+          r.status || '',
+          r.purchaseDate ? new Date(r.purchaseDate).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) : '',
         ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
         csvRows.push(line.join(','));
       });
@@ -105,7 +108,7 @@ export default function Transactions() {
         </div>
 
         <div className="mb-4 flex flex-wrap items-center gap-3">
-          <SearchInput value={search} onChange={setSearch} placeholder="Search customer, email, product, or campaign…" />
+          <SearchInput value={search} onChange={setSearch} placeholder="Search invoice #, customer, email, product, or campaign…" />
           <LocationFilter value={location} centers={centers} onChange={setLocation} />
       <select
             value={platform}
@@ -116,6 +119,15 @@ export default function Transactions() {
             {(data?.availablePlatforms || []).map((p) => (
               <option key={p} value={p}>{p}</option>
             ))}
+          </select>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="rounded-full border border-ink/15 bg-white px-3.5 py-2 text-[12px] font-semibold text-ink/70 focus:border-copper focus:outline-none"
+          >
+            <option value="all">All Statuses</option>
+            <option value="closed">Closed only</option>
+            <option value="open">Open only</option>
           </select>
           <button
             onClick={exportCsv}
@@ -133,21 +145,24 @@ export default function Transactions() {
         ) : (
           <>
             <div className="scrollbar-thin overflow-x-auto">
-          <table className="w-full min-w-[1100px] border-collapse text-[13.5px]">
+          <table className="w-full min-w-[1200px] border-collapse text-[13.5px]">
                 <thead>
                   <tr className="border-b border-ink/10 text-left font-mono text-[10.5px] uppercase tracking-wide text-ink/45">
+                    <th className="pb-2.5 pr-4">Invoice #</th>
                     <th className="pb-2.5 pr-4">Customer</th>
                     <th className="pb-2.5 pr-4">Email</th>
                     <th className="pb-2.5 pr-4">Product</th>
                     <th className="pb-2.5 pr-4 text-right">Price</th>
                     <th className="pb-2.5 pr-4">Location</th>
                     <th className="pb-2.5 pr-4">Ads / Campaign</th>
+                    <th className="pb-2.5 pr-4">Status</th>
                     <th className="pb-2.5 text-right">Purchase Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {transactions.map((t, i) => (
                     <tr key={i} className="border-b border-ink/10 last:border-none">
+                      <td className="py-2.5 pr-4 font-mono text-[12.5px] text-ink/70">{t.invoiceNumber || '—'}</td>
                       <td className="py-2.5 pr-4 font-medium text-ink">{t.customerName || '—'}</td>
                       <td className="py-2.5 pr-4 text-ink/70">{t.email || '—'}</td>
                       <td className="py-2.5 pr-4 text-ink/70">{t.productName || '—'}</td>
@@ -155,6 +170,11 @@ export default function Transactions() {
                       <td className="py-2.5 pr-4 text-ink/70">{t.location || '—'}</td>
                       <td className="py-2.5 pr-4">
                         <PlatformBadge platform={t.platform} /> <span className="text-ink/50">{t.campaign}</span>
+                      </td>
+                      <td className="py-2.5 pr-4">
+                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${t.status === 'open' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                          {t.status === 'open' ? 'Open' : 'Closed'}
+                        </span>
                       </td>
                       <td className="py-2.5 text-right font-mono text-ink/50">{shortDateTime(t.purchaseDate)}</td>
                     </tr>

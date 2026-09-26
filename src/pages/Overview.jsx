@@ -390,7 +390,7 @@ export default function Overview() {
                       <td className="py-2.5 text-ink/70">{p.centerName || '—'}</td>
                       <td className="py-2.5 text-right font-mono">{money(p.amount)}</td>
                       <td className="py-2.5 text-right text-ink/50">
-                        {new Date(p.closedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                        {new Date(p.closedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/New_York' })}
                       </td>
                     </tr>
                   ))}
