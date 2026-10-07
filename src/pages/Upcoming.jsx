@@ -59,6 +59,7 @@ export default function Upcoming() {
         <p className="mb-4 text-[12.5px] text-ink/50">
           Not counted in any revenue total. Source is the exact UTM from the booking link, not a guess.
           Est. Value is the average price charged for that service over the last 6 months - an estimate, not a confirmed amount.
+          Cancelled bookings are shown for visibility but excluded from the total above.
         </p>
 
         <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -81,7 +82,7 @@ export default function Upcoming() {
           <EmptyState text="No upcoming bookings in the pipeline right now." />
         ) : (
           <div className="scrollbar-thin -mx-1 overflow-x-auto">
-            <table className="w-full min-w-[1150px] border-collapse px-1 text-[13.5px]">
+            <table className="w-full min-w-[1280px] border-collapse px-1 text-[13.5px]">
               <thead>
                 <tr className="border-b border-ink/10 text-left font-mono text-[10.5px] uppercase tracking-wide text-ink/45">
                   <th className="pb-2.5 pr-4">Invoice #</th>
@@ -90,31 +91,48 @@ export default function Upcoming() {
                   <th className="pb-2.5 pr-4">Location</th>
                   <th className="pb-2.5 pr-4">Source / Campaign</th>
                   <th className="pb-2.5 pr-4 text-right">Est. Value</th>
+                  <th className="pb-2.5 pr-4 text-right">Status</th>
                   <th className="pb-2.5 pr-4 text-right">Booked / Paid On</th>
                   <th className="pb-2.5 text-right">Appointment Date</th>
                 </tr>
               </thead>
               <tbody>
-                {data.bookings.map((b) => (
-                  <tr key={b.appointmentId} className="border-b border-ink/10 last:border-none">
-                    <td className="py-2.5 pr-4 font-mono text-[12.5px] text-ink/70">{b.invoiceNumber || '—'}</td>
-                    <td className="py-2.5 pr-4">
-                      <div className="font-medium text-ink">{b.customerName || '—'}</div>
-                      <div className="text-[12px] text-ink/45">{b.email || '—'}</div>
-                    </td>
-                    <td className="py-2.5 pr-4 text-ink/80">{(b.services || []).join(', ') || '—'}</td>
-                    <td className="py-2.5 pr-4 text-ink/60">{b.location || '—'}</td>
-                    <td className="py-2.5 pr-4">
-                      <div className="flex items-center gap-2">
-                        <PlatformBadge platform={b.utmSource || 'direct'} />
-                        <span className="text-ink/50">{b.utmCampaign || '(no campaign)'}</span>
-                      </div>
-                    </td>
-                    <td className="py-2.5 pr-4 text-right font-mono text-ink/70">{money(b.estimatedValue)}</td>
-                    <td className="py-2.5 pr-4 text-right font-mono text-ink/50">{b.bookedAt ? shortDateTime(b.bookedAt) : '—'}</td>
-                    <td className="py-2.5 text-right font-mono text-ink/50">{shortDateTime(b.appointmentDate)}</td>
-                  </tr>
-                ))}
+                {data.bookings.map((b) => {
+                  const isCancelled = b.status === 'cancelled';
+                  return (
+                    <tr key={b.appointmentId} className={`border-b border-ink/10 last:border-none${isCancelled ? ' opacity-50' : ''}`}>
+                      <td className="py-2.5 pr-4 font-mono text-[12.5px] text-ink/70">{b.invoiceNumber || '—'}</td>
+                      <td className="py-2.5 pr-4">
+                        <div className="font-medium text-ink">{b.customerName || '—'}</div>
+                        <div className="text-[12px] text-ink/45">{b.email || '—'}</div>
+                      </td>
+                      <td className="py-2.5 pr-4 text-ink/80">{(b.services || []).join(', ') || '—'}</td>
+                      <td className="py-2.5 pr-4 text-ink/60">{b.location || '—'}</td>
+                      <td className="py-2.5 pr-4">
+                        <div className="flex items-center gap-2">
+                          <PlatformBadge platform={b.utmSource || 'direct'} />
+                          <span className="text-ink/50">{b.utmCampaign || '(no campaign)'}</span>
+                        </div>
+                      </td>
+                      <td className={`py-2.5 pr-4 text-right font-mono ${isCancelled ? 'text-ink/40 line-through' : 'text-ink/70'}`}>{money(b.estimatedValue)}</td>
+                      <td className="py-2.5 pr-4 text-right">
+                        {isCancelled ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-[11.5px] font-semibold text-red-600">
+                            <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                            Cancelled
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11.5px] font-semibold text-emerald-700">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Upcoming
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2.5 pr-4 text-right font-mono text-ink/50">{b.bookedAt ? shortDateTime(b.bookedAt) : '—'}</td>
+                      <td className="py-2.5 text-right font-mono text-ink/50">{shortDateTime(b.appointmentDate)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             <Pagination page={data.page} totalPages={data.totalPages} total={data.total} onChange={setPage} />
