@@ -3,7 +3,7 @@ import { getTransactions, getCenterList } from '../api';
 import { EmptyState, SkeletonLines, ErrorBanner, SearchInput, Pagination, DateRangeFilter, LocationFilter, PlatformBadge, ResetFiltersButton } from '../components';
 import { money, shortDateTime } from '../platforms';
 
-const PLATFORM_OPTIONS = ['all', 'meta', 'google', 'awin', 'klaviyo', 'direct', 'unattributed'];
+const PLATFORM_OPTIONS = ['all', 'meta', 'google', 'google_call', 'awin', 'klaviyo', 'direct', 'unattributed'];
 
 export default function Transactions() {
   const [search, setSearch] = useState('');

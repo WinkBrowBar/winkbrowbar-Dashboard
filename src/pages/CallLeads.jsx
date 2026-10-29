@@ -240,6 +240,7 @@ export default function CallLeads() {
                   <span className="text-ink/50">{lastSyncResult.duplicates ?? 0} duplicates</span>
                   <span className="text-ink/50">{lastSyncResult.skippedBadPhone ?? 0} bad phone</span>
                   <span className="text-ink/50">{lastSyncResult.skippedBadDate ?? 0} bad date</span>
+                  <span><strong className="text-sage">{lastSyncResult.matched ?? 0}</strong> sales marked Google Call{lastSyncResult.matchedInvoices?.length ? ` (${lastSyncResult.matchedInvoices.join(', ')})` : ''}</span>
                 </div>
               )
             )}

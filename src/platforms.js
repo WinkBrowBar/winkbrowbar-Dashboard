@@ -32,6 +32,7 @@ export function chipColors(meta) {
 export const PLATFORMS = {
   meta: { label: 'Meta', color: '#5b6472', soft: '#e5e8ec' },
   google: { label: 'Google', color: '#a85c3b', soft: '#f0ddd3' },
+  google_call: { label: 'Google Call', color: '#c9894f', soft: '#f3e3d2' },
   awin: { label: 'AWIN', color: '#6e7f63', soft: '#e3e8df' },
   klaviyo: { label: 'Klaviyo', color: '#b5677a', soft: '#f3e1e5' },
   unattributed: { label: 'Unattributed', color: '#c9c4bb', soft: '#eeeae2' },
